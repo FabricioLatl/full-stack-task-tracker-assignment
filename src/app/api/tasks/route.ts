@@ -1,49 +1,27 @@
-// src/app/api/tasks/route.ts
 import { NextRequest, NextResponse } from 'next/server'
-import { adminDb } from '@/lib/firebaseAdmin' // using Firestore via firebase-admin
+import { adminDb } from '../../lib/firebaseAdmin'
 
-const TASKS_COLLECTION = 'tasks'
-
-// GET /api/tasks — fetch all tasks
 export async function GET() {
   try {
-    const snapshot = await adminDb.collection(TASKS_COLLECTION).get()
+    const snap = await adminDb.collection('tasks').orderBy('createdAt', 'desc').get()
     const tasks: any[] = []
-    snapshot.forEach((doc) => {
-      tasks.push({ id: doc.id, ...doc.data() })
-    })
-
+    snap.forEach(d => tasks.push({ id: d.id, ...d.data() }))
     return NextResponse.json({ tasks }, { status: 200 })
-  } catch (error) {
-    console.error('GET /api/tasks error:', error)
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch tasks' }, { status: 500 })
   }
 }
 
-// POST /api/tasks — create a new task
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    const { title, description } = await request.json()
-
+    const { title, description, status, dueDate } = await req.json()
     if (!title || !description) {
-      return NextResponse.json({ error: 'Missing title or description' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid data' }, { status: 400 })
     }
-
-    const newTask = {
-      title,
-      description,
-      status: 'pending',
-      createdAt: Date.now(),
-    }
-
-    const docRef = await adminDb.collection(TASKS_COLLECTION).add(newTask)
-
-    return NextResponse.json(
-      { id: docRef.id, ...newTask },
-      { status: 201 }
-    )
-  } catch (error) {
-    console.error('POST /api/tasks error:', error)
+    const createdAt = Date.now()
+    const docRef = await adminDb.collection('tasks').add({ title, description, status: status || 'pending', createdAt, dueDate: dueDate || '' })
+    return NextResponse.json({ id: docRef.id, title, description, status: status || 'pending', createdAt, dueDate: dueDate || '' }, { status: 201 })
+  } catch {
     return NextResponse.json({ error: 'Failed to create task' }, { status: 500 })
   }
 }
