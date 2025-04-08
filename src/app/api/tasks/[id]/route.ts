@@ -3,11 +3,10 @@ import { adminDb } from '@/app/lib/firebaseAdmin'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string | string[] } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const id = Array.isArray(params.id) ? params.id[0] : params.id
-    const doc = await adminDb.collection('tasks').doc(id).get()
+    const doc = await adminDb.collection('tasks').doc(params.id).get()
     if (!doc.exists) {
       return NextResponse.json({ error: 'Not found' }, { status: 404 })
     }
@@ -19,10 +18,9 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string | string[] } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const id = Array.isArray(params.id) ? params.id[0] : params.id
     const { title, description, status, dueDate } = await req.json()
     const updateData: Record<string, any> = {}
     if (title !== undefined) updateData.title = title
@@ -32,8 +30,8 @@ export async function PATCH(
     if (!Object.keys(updateData).length) {
       return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
     }
-    await adminDb.collection('tasks').doc(id).update(updateData)
-    return NextResponse.json({ id, ...updateData }, { status: 200 })
+    await adminDb.collection('tasks').doc(params.id).update(updateData)
+    return NextResponse.json({ id: params.id, ...updateData }, { status: 200 })
   } catch {
     return NextResponse.json({ error: 'Failed to update task' }, { status: 500 })
   }
@@ -41,11 +39,10 @@ export async function PATCH(
 
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string | string[] } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const id = Array.isArray(params.id) ? params.id[0] : params.id
-    await adminDb.collection('tasks').doc(id).delete()
+    await adminDb.collection('tasks').doc(params.id).delete()
     return NextResponse.json({ message: 'Task deleted' }, { status: 200 })
   } catch {
     return NextResponse.json({ error: 'Failed to delete task' }, { status: 500 })
