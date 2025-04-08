@@ -1,5 +1,5 @@
-// src/app/layout.tsx
-import './styles/globals.css'
+
+import './styles/tailwind.css'
 import { ReactNode } from 'react'
 
 export const metadata = {
@@ -11,7 +11,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className="bg-gray-50 text-gray-800">
-        {/* Simple Header (optional) */}
         <header className="p-4 bg-blue-500 text-white font-bold">
           Task Tracker
         </header>
