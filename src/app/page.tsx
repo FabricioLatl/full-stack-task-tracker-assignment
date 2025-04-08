@@ -1,9 +1,11 @@
+export const dynamic = 'force-dynamic'
+
 // src/app/page.tsx
 import { adminDb } from './lib/firebaseAdmin'
 import TaskTracker from './components/TaskTracker'
 
 export default async function HomePage() {
-  // SERVER-SIDE FETCH (SSR/SSG):
+  // SERVER-SIDE FETCH (SSR):
   // Pull tasks directly from Firestore here.
   try {
     const snap = await adminDb
@@ -13,9 +15,6 @@ export default async function HomePage() {
     const tasks: any[] = []
     snap.forEach((doc) => tasks.push({ id: doc.id, ...doc.data() }))
 
-    // Optionally: If you want SSG with revalidation, you can
-    // export const revalidate = 60 // re-generate this page every 60s
-
     return (
       <main>
         {/* Pass tasks to the client component */}
@@ -23,7 +22,6 @@ export default async function HomePage() {
       </main>
     )
   } catch (err) {
-    // If Firestore fails, you can gracefully handle it
     return (
       <main className="p-4">
         <h1>Failed to load tasks.</h1>
